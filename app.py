@@ -1,4 +1,5 @@
-from flask import Flask
+from flask import Flask, render_template
+
 
 app = Flask(__name__)
 
@@ -11,14 +12,15 @@ status = ""
         #start the login 
 
 
-    
+@app.route('/display_menu')    
 def displayMenu():
         status = input("Are you registered user? y/n? Press q to quit")
         if status == "y":
             oldUser()
         elif status == "n":
             newUser()
-    
+
+@app.route('/new_user')       
 def newUser():
         createLogin = input("Create login name: ")
     
@@ -28,7 +30,9 @@ def newUser():
             createPassw = input("Create password: ")
             users[createLogin] = createPassw
             print("\nUser created\n")
-    
+
+
+@app.route('/old_user')       
 def oldUser():
         login = input("Enter login name: ")
         passw = input("Enter password: ")
@@ -43,7 +47,7 @@ def oldUser():
         
     #end of login
     
-
+        return render_template('index.html')
 
 
 # def post(self):
