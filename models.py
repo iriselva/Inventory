@@ -2,15 +2,13 @@ from pydantic import BaseModel, Field
 from bson import ObjectId
 from pymongo import MongoClient
 from typing import Optional
-import pymongo
+# import pymongo
 import os
 
-client = pymongo.MongoClient(os.environ['MONGODB_URI'])
+client = MongoClient(os.environ['MONGODB_URI'])
 db = client.database
 
-
 class PyObjectId(ObjectId):
-
     @classmethod
     def __get_validators__(cls):
         yield cls.validate

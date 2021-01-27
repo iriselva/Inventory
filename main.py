@@ -1,17 +1,15 @@
 from fastapi import FastAPI
-import requests
 from models import db, User
+from bson import ObjectId
+# import requests
 import traceback
 import logging
-# importin the models.py file (object-id)
-#from models import db, User
 
 app = FastAPI()
 
-
 @app.get('/')
 async def index():
-    return{'key': 'value'}
+    return 'Hello there!'
 
 @app.get('/users')
 async def list_users():
@@ -21,30 +19,48 @@ async def list_users():
             users.append(User(**user))
         return {'users': users}    
     except Exception as e:
-        print("An exception occurred", e)
+        logging.error("An exception occurred", e)
         logging.error(traceback.format_exc())
+        # TODO: return status code 500 or something idk
 
     return {'users': []}
 
 @app.get('/users/{user_id}')
-def get_user(user_id: str):
-    user = db.users.find({'_id':user_id})
-    print(user)
+async def get_user(user_id: str):
+    try:
+        user = db.users.find_one({'_id': ObjectId(user_id)})
+    except Exception as e:
+        logging.error("An exception occurred", e)
+        logging.error(traceback.format_exc())
+        # TODO: return status code 500 or something idk
+
     return {'user': User(**user)}
 
 
 # to create a user
-@app.post('/users')
+@app.post('/users', status_code=201)
 # making type annotations making a variable for fastapi
 async def create_user(user: User):
+    # TODO: return status code 409 if email is already in use
     if hasattr(user, 'id'):
         delattr(user, 'id')
-    ret = db.users.insert_one(user.dict(by_alias=True))
-    user.id = ret.inserted_id
+
+    try:
+        result = db.users.insert_one(user.dict(by_alias=True))
+    except Exception as e:
+        logging.error("An exception occurred", e)
+        logging.error(traceback.format_exc())
+        # TODO: return status code 500 or something idk
+
+    user.id = result.inserted_id
     return {'user': user}
 
 # to delete a user
 @app.delete('/users/{user_id}')
-def delete_user(user_id: int):
-    db.pop(user_id-1)
-    return{}
+async def delete_user(user_id: str):
+    try:
+        db.users.delete_one({'_id': ObjectId(user_id)})
+    except Exception as e:
+        logging.error("An exception occurred", e)
+        logging.error(traceback.format_exc())
+        # TODO: return status code 500 or something idk

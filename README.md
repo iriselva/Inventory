@@ -6,6 +6,9 @@ commands for virtual environment
 python3 -m venv venv
 source venv/bin/activate
 
+on Windows
+.\venv\Scripts\activate
+
 make a gitignore
 /venv
 /__pycache__
