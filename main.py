@@ -36,7 +36,6 @@ async def get_user(user_id: str):
 
     return {'user': User(**user)}
 
-
 # to create a user
 @app.post('/users', status_code=201)
 # making type annotations making a variable for fastapi
