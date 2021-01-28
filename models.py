@@ -2,9 +2,8 @@ from pydantic import BaseModel, Field
 from bson import ObjectId
 from pymongo import MongoClient
 from typing import Optional
-import datetime
+import datetime, os
 # import pymongo
-import os
 
 client = MongoClient(os.environ['MONGODB_URI'])
 db = client.database
@@ -45,12 +44,13 @@ class User(BaseModel):
 class Item(BaseModel):
     id: Optional[PyObjectId] = Field(alias='_id')
     item: str
-    # date: datetime.datetime
+    date: str
     description: str
     type_of_item: str
     amount: int
-    # user_id: 
-    # image: url
+    user_id: str
+    image: str
+    location: str
     
 
     #The inner class Config is used to define some configuration for the model. Here we tell Pydantic that we are using a custom type (by arbitrary_types_allowed) and also a mapping for JSON serialization (by json_encoders).

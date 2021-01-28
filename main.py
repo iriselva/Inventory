@@ -1,10 +1,9 @@
 from fastapi import FastAPI
-from models import db, User
+from models import db, User, Item
 from bson import ObjectId
 # import requests
-import traceback
-import logging
-
+import traceback, logging
+from routes.inventory import add_inventory_routes
 app = FastAPI()
 
 @app.get('/')
@@ -63,3 +62,5 @@ async def delete_user(user_id: str):
         logging.error("An exception occurred", e)
         logging.error(traceback.format_exc())
         # TODO: return status code 500 or something idk
+
+add_inventory_routes(app)
