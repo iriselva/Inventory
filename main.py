@@ -5,8 +5,7 @@ from fastapi import FastAPI, HTTPException
 from models import db, User, Item, validate_user_id
 from bson import ObjectId
 import traceback, logging
-
-from routes.inventory import add_inventory_routes
+from inventory import add_inventory_routes
 from uuid import uuid4
 from mysecurity import check_api_key
 from inventory import add_inventory_routes
