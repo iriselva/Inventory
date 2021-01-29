@@ -1,12 +1,21 @@
 from pydantic import BaseModel, Field
 from bson import ObjectId
 from pymongo import MongoClient
+from fastapi import HTTPException
 from typing import Optional
 import datetime, os
 # import pymongo
 
 client = MongoClient(os.environ['MONGODB_URI'])
 db = client.database
+   
+def validate_item_id(item_id: str):
+    if not ObjectId.is_valid(user_id):
+        raise HTTPException(400, 'Invalid item id')
+    
+def validate_user_id(user_id: str):
+     if not ObjectId.is_valid(user_id):
+        raise HTTPException(400, 'Invalid user id')
 
 class PyObjectId(ObjectId):
     @classmethod
@@ -48,9 +57,9 @@ class Item(BaseModel):
     description: str
     type_of_item: str
     amount: int
-    user_id: str
+    user_id: Optional[str]
     image: str
-    location: str
+    #location: str
     
 
     #The inner class Config is used to define some configuration for the model. Here we tell Pydantic that we are using a custom type (by arbitrary_types_allowed) and also a mapping for JSON serialization (by json_encoders).
@@ -59,3 +68,14 @@ class Item(BaseModel):
         json_encoders = {
             ObjectId: str
         }
+        schema_extra = {
+            "example": {
+                "item": "test",
+                "date": "string",
+                "description": "string",
+                "type_of_item": "string",
+                "amount": 0,
+                "image": "string"
+            }
+        }
+    
