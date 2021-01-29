@@ -1,16 +1,18 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Security
 from models import db, User, Item
 from bson import ObjectId
-# import requests
 import traceback, logging
 from routes.inventory import add_inventory_routes
+from uuid import uuid4
+from mysecurity import check_api_key
+
 app = FastAPI()
 
 @app.get('/')
 async def index():
     return 'Hello there!'
 
-@app.get('/users')
+@app.get('/users', dependencies=[Security(check_api_key)])
 async def list_users():
     users = []
     try:
@@ -40,18 +42,32 @@ async def get_user(user_id: str):
 # making type annotations making a variable for fastapi
 async def create_user(user: User):
     # TODO: return status code 409 if email is already in use
-    if hasattr(user, 'id'):
-        delattr(user, 'id')
+
+    # get user dict from pydantic model
+    user_data = dict(user)
+
+    # remove empty ID from dict
+    del user_data['id']
+
+    # generate new API key and add to dict
+    user_data['api_key'] = str(uuid4())
 
     try:
-        result = db.users.insert_one(user.dict(by_alias=True))
+        # insert user into MongoDB
+        db.users.insert_one(user_data)
     except Exception as e:
         logging.error("An exception occurred", e)
         logging.error(traceback.format_exc())
         # TODO: return status code 500 or something idk
 
-    user.id = result.inserted_id
-    return {'user': user}
+    # convert ObjectID '_id' to string
+    user_data['id'] = str(user_data['_id'])
+
+    # remove '_id' (but keep 'id') because it can't be serialized to JSON
+    del user_data['_id']
+
+    # return the newly created user to the client
+    return {'user': user_data}
 
 # to delete a user
 @app.delete('/users/{user_id}')
