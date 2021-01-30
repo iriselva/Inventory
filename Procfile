@@ -1,1 +1,1 @@
-web: uvicorn --port $PORT app:main 
+web: uvicorn --port $PORT config.asgi:main 
