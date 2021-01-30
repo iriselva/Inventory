@@ -12,6 +12,7 @@ async def index():
 add_users_routes(app)
 add_inventory_routes(app)
 
+print('BEFORE MAIN')
 if __name__ == "__main__":
-    print('THIS DOES SOMETHING?')
+    print('AFTER MAIN')
     uvicorn.run("app:main", host='0.0.0.0')
