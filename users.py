@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Security, HTTPException
-from models import db, User, validate_user_id
+from models import db, User, validate_user_id, MONGO_ID
 from bson import ObjectId
 import traceback, logging # fix
 from uuid import uuid4
@@ -22,7 +22,7 @@ def add_users_routes(app):
 
       validate_id(user_id)
 
-      user = db.users.find_one({'_id': ObjectId(user_id)})
+      user = db.users.find_one({MONGO_ID: ObjectId(user_id)})
       
       if user is None:
           raise HTTPException(404, "User not found")
@@ -65,13 +65,13 @@ def add_users_routes(app):
   @app.delete('/users/{user_id}', status_code=204)
   async def delete_user(user_id: str):
 
-      validate_id(user_id)
+      validate_user_id(user_id)
       
-      user = db.users.find_one({'_id': ObjectId(user_id)})
+      user = db.users.find_one({MONGO_ID: ObjectId(user_id)})
       if user is None:
           raise HTTPException(404, "User not found")
 
-      result = db.users.delete_one({'_id': ObjectId(user_id)})
+      result = db.users.delete_one({MONGO_ID: ObjectId(user_id)})
 
       if result.deleted_count == 0:
           raise HTTPException(400, 'Unable to delete')

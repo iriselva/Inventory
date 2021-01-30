@@ -8,9 +8,11 @@ import datetime, os
 
 client = MongoClient(os.environ['MONGODB_URI'])
 db = client.database
+
+MONGO_ID = "_id"
    
 def validate_item_id(item_id: str):
-    if not ObjectId.is_valid(user_id):
+    if not ObjectId.is_valid(item_id):
         raise HTTPException(400, 'Invalid item id')
     
 def validate_user_id(user_id: str):
@@ -38,7 +40,7 @@ class PyObjectId(ObjectId):
 
 # creating a model
 class User(BaseModel):
-    id: Optional[PyObjectId] = Field(alias='_id')
+    id: Optional[PyObjectId] = Field(alias=MONGO_ID)
     name: str
     email: str
     password: str
@@ -51,7 +53,7 @@ class User(BaseModel):
         }
 
 class Item(BaseModel):
-    id: Optional[PyObjectId] = Field(alias='_id')
+    id: Optional[PyObjectId] = Field(alias=MONGO_ID)
     item: str
     date: str
     description: str
