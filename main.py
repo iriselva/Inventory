@@ -1,7 +1,7 @@
 
 from fastapi import FastAPI
-from app.inventory import add_inventory_routes
-from app.users import add_users_routes
+from inventory import add_inventory_routes
+from users import add_users_routes
 
 app = FastAPI()
 

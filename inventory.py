@@ -1,5 +1,5 @@
 import requests
-from app.models import db, Item, validate_item_id, validate_user_id, MONGO_ID
+from models import db, Item, validate_item_id, validate_user_id, MONGO_ID
 from bson import ObjectId
 from fastapi import HTTPException
 import traceback
