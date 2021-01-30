@@ -1,1 +1,1 @@
-web: hypercorn -b 0.0.0.0:${PORT} "app:main"
+web: uvicorn -b 0.0.0.0:${PORT} "app:main"
