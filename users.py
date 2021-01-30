@@ -1,9 +1,9 @@
 from fastapi import FastAPI, Security, HTTPException
-from app.models import db, User, validate_user_id, MONGO_ID
+from models import db, User, validate_user_id, MONGO_ID
 from bson import ObjectId
 import traceback, logging # fix
 from uuid import uuid4
-from app.mysecurity import check_api_key
+from mysecurity import check_api_key
 
 def add_users_routes(app):
 
