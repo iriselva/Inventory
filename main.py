@@ -13,4 +13,5 @@ add_users_routes(app)
 add_inventory_routes(app)
 
 if __name__ == "__main__":
+    print('THIS DOES SOMETHING?')
     uvicorn.run("app:main", host='0.0.0.0')
