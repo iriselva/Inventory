@@ -1,6 +1,6 @@
 from fastapi.security.api_key import APIKeyHeader, HTTPException
 from fastapi import status, Depends
-from models import db
+from app.models import db
 
 api_key_header = APIKeyHeader(name='X-API-Key', auto_error=True)
 
