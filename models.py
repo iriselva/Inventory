@@ -51,6 +51,14 @@ class User(BaseModel):
         json_encoders = {
             ObjectId: str
         }
+        schema_extra = {
+            "example": {
+                "name": "str",
+                "email": "str",
+                "password": "str"
+            }
+        }
+
 
 class Item(BaseModel):
     id: Optional[PyObjectId] = Field(alias=MONGO_ID)
