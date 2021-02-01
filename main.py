@@ -3,8 +3,17 @@ from inventory import add_inventory_routes
 from users import add_users_routes
 from fastapi.openapi.utils import get_openapi
 from starlette.responses import RedirectResponse
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_headers=["*"],
+    allow_methods=["*"],
+)
 
 def custom_openapi():
     if app.openapi_schema:
