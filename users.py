@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Security, HTTPException
-from models import db, User, validate_user_id, MONGO_ID
+from models import db, User, UserOut, validate_user_id, validate_user_email, MONGO_ID
 from bson import ObjectId
 from uuid import uuid4
 from mysecurity import check_api_key
@@ -16,11 +16,11 @@ def add_users_routes(app):
       return User(**user)
 
   # to create a user
-  @app.post('/users', status_code=201)
+  @app.post('/users', response_model=UserOut, status_code=201)
   # making type annotations making a variable for fastapi
   async def create_user(user: User):
       # TODO: return status code 409 if email is already in use
-
+      validate_user_email(user.email)
       # get user dict from pydantic model
       user_data = dict(user)
 
