@@ -6,7 +6,9 @@ from mysecurity import check_api_key
 import bcrypt
 
 def add_users_routes(app):
-  @app.get('/users')
+  @app.get(
+      '/users',
+      tags=["Users"])
   async def get_user(user: str = Security(check_api_key)):
       user = db.users.find_one({MONGO_ID: user[MONGO_ID]})
       
@@ -16,11 +18,21 @@ def add_users_routes(app):
       return User(**user)
 
   # to create a user
-  @app.post('/users', status_code=201)
+  @app.post(
+      '/users',
+      tags=["Users"],
+      summary="Create a user",
+      status_code=201)
   # making type annotations making a variable for fastapi
   async def create_user(user: User):
       # TODO: return status code 409 if email is already in use
+      """
+      Create an item with all the information:
 
+      - **name**: user name. Required
+      - **email**: required
+      - **password**: required
+      """
       # get user dict from pydantic model
       user_data = dict(user)
 
@@ -55,7 +67,7 @@ def add_users_routes(app):
       return {'user': user_data}
 
   # to delete a user
-  @app.delete('/users', status_code=200)
+  @app.delete('/users', tags=["Users"], status_code=200)
   async def delete_user(user: str = Security(check_api_key)):
     result = db.users.delete_one({MONGO_ID: user[MONGO_ID]})
 
