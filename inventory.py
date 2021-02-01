@@ -11,7 +11,10 @@ from mysecurity import check_api_key
 def add_inventory_routes(app):
 
     # create item POST
-    @app.post('/inventory', status_code=201)
+    @app.post(
+        '/inventory',
+        tags=["Inventory"],
+        status_code=201)
     # making type annotations making a variable for fastapi
     async def create_item(item: Item, user: str = Security(check_api_key)):
         if hasattr(item, 'id'):
@@ -27,7 +30,10 @@ def add_inventory_routes(app):
         return item
 
     # get all inventory items by user
-    @app.get('/inventory')
+    @app.get(
+        '/inventory',
+        tags=["Inventory"],
+        description="A more detailed description goes here.....")
     async def get_inventory(user: str = Security(check_api_key)):
         items = []
         for item in db.inventory.find({'user_id': str(user['_id'])}):
@@ -35,7 +41,9 @@ def add_inventory_routes(app):
     
         return items    
 
-    @app.patch('/inventory/{item_id}', status_code=201)
+    @app.patch('/inventory/{item_id}',
+        tags=["Inventory"],
+        description="A more detailed description goes here.....", status_code=201)
     # making type annotations making a variable for fastapi
     async def update_item(item_id: str, item: Item, user: str = Security(check_api_key)):
         validate_item_id(item_id)
@@ -63,7 +71,9 @@ def add_inventory_routes(app):
 
         return item    
 
-    @app.delete('/inventory/{item_id}', status_code=200)
+    @app.delete('/inventory/{item_id}',
+        tags=["Inventory"],
+        status_code=200)
     async def delete_item(item_id: str, user: str = Security(check_api_key)):
         
         validate_item_id(item_id)
