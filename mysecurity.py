@@ -8,12 +8,9 @@ def check_api_key(x_api_key: str = Depends(api_key_header)):
     try:
         user = db.users.find_one({'api_key': x_api_key})
     except Exception:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
-        )
+        raise HTTPException(500, 'Internal Server Error')
     
     if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail='Invalid API key'
-        )
+        raise HTTPException(401, 'Invalid API key')
+
+    return user
