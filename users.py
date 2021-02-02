@@ -1,69 +1,50 @@
-from fastapi import FastAPI, Security, HTTPException
-from models import db, User, UserOut, validate_user_id, validate_user_email, MONGO_ID
-from bson import ObjectId
-from uuid import uuid4
-from mysecurity import check_api_key
-import bcrypt
+from models import db, User, UserOut, validate_user_email, MONGO_ID
+from mysecurity import get_current_user, get_password_hash
+from fastapi import HTTPException, Depends
 
 def add_users_routes(app):
-  @app.get(
-      '/users',
-      tags=["Users"])
-  async def get_user(user: str = Security(check_api_key)):
-      user = db.users.find_one({MONGO_ID: user[MONGO_ID]})
-      
-      if user is None:
-          raise HTTPException(404, "User not found")
+    # to create a user
+    @app.post('/users', tags=["Users"], summary="Create a user", response_model=UserOut, status_code=201)
+    async def create_user(user: User):
+        if hasattr(user, 'id'):
+            delattr(user, 'id')
 
-      return User(**user)
+        # check if email is valid
+        validate_user_email(user.email)
 
-  # to create a user
-  @app.post('/users',
-            tags=["Users"],
-            summary="Create a user",
-            response_model=UserOut, 
-            status_code=201)
-  # making type annotations making a variable for fastapi
-  async def create_user(user: User):
-      # TODO: return status code 409 if email is already in use
-      validate_user_email(user.email)
-      # get user dict from pydantic model
-      user_data = dict(user)
+        # check if email is already in use
+        try:
+            email_user = db.users.find_one({'email': user.email})
+        except Exception:
+            raise HTTPException(500, "Internal Server Error")
+        if email_user:
+            raise HTTPException(409, "This email is already in use")
 
-      # remove empty ID from dict
-      del user_data['id']
+        # hash password
+        user.password = get_password_hash(user.password)
 
-      # generate new API key and add to dict
-      user_data['api_key'] = str(uuid4())
+        # insert user into MongoDB
+        try:
+            db.users.insert_one(dict(user))
+        except Exception as e:
+            raise HTTPException(500, "Internal Server Error")
 
-      # change password to bytes string before we hash it
-      user_data['password'] = bytes(user_data['password'], 'utf-8')
+        # return the newly created user to the client
+        return dict(user)
 
-      # hash password with bcrypt
-      user_data['password'] = bcrypt.hashpw(user_data['password'], bcrypt.gensalt())
 
-      # change hashed password to bytes string to string
-      user_data['password'] = str(user_data['password'])
+    @app.get('/users', tags=["Users"], status_code=200)
+    async def get_user(user: User = Depends(get_current_user)):
+        user['id'] = str(user['_id'])
+        del user['_id']
+        del user['password']
+        return user
 
-      try:
-          # insert user into MongoDB
-          db.users.insert_one(user_data)
-      except Exception as e:
-          raise HTTPException(500, "Internal Server Error")
 
-      # convert ObjectID '_id' to string
-      user_data['id'] = str(user_data['_id'])
+    # to delete a user
+    @app.delete('/users', tags=["Users"], status_code=200)
+    async def delete_user(user: User = Depends(get_current_user)):
+        result = db.users.delete_one({MONGO_ID: user[MONGO_ID]})
 
-      # remove '_id' (but keep 'id') because it can't be serialized to JSON
-      del user_data['_id']
-
-      # return the newly created user to the client
-      return {'user': user_data}
-
-  # to delete a user
-  @app.delete('/users', tags=["Users"], status_code=200)
-  async def delete_user(user: str = Security(check_api_key)):
-    result = db.users.delete_one({MONGO_ID: user[MONGO_ID]})
-
-    if result.deleted_count == 0:
-        raise HTTPException(400, 'Unable to delete')
+        if result.deleted_count == 0:
+            raise HTTPException(400, 'Unable to delete')

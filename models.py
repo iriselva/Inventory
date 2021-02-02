@@ -1,11 +1,11 @@
-from pydantic import BaseModel, Field
-from bson import ObjectId
-from pymongo import MongoClient
-from fastapi import HTTPException
-from typing import Optional
-from datetime import datetime
-import datetime, os
 from email_validator import validate_email, EmailNotValidError
+from pydantic import BaseModel, Field
+from fastapi import HTTPException
+from pymongo import MongoClient
+from typing import Optional
+from bson import ObjectId
+import datetime
+import os
 
 client = MongoClient(os.environ['MONGODB_URI'])
 db = client.database
@@ -87,7 +87,7 @@ class Item(BaseModel):
     user_id: Optional[str]
     image: str
     location: str
-    price: int
+    price: str
     
 
     #The inner class Config is used to define some configuration for the model. Here we tell Pydantic that we are using a custom type (by arbitrary_types_allowed) and also a mapping for JSON serialization (by json_encoders).
@@ -109,3 +109,10 @@ class Item(BaseModel):
             }
         }
     
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+class TokenData(BaseModel):
+    user_id: Optional[str] = None
+    username: Optional[str] = None
