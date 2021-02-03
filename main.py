@@ -18,7 +18,6 @@ app.add_middleware(
     allow_credentials=True,
     allow_headers=["*"],
     allow_methods=["*"],
-    access_control_allow_origin=["*"],
 )
 
 def custom_openapi():
