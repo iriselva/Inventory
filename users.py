@@ -10,10 +10,12 @@ def add_users_routes(app):
             delattr(user, 'id')
 
         # check if email is valid
+        print('before validate')
         validate_user_email(user.email)
-
+        print('after validate')
         # check if email is already in use
         try:
+            print('before find')
             email_user = db.users.find_one({'email': user.email})
         except Exception:
             raise HTTPException(500, "Internal Server Error")
@@ -21,6 +23,7 @@ def add_users_routes(app):
             raise HTTPException(409, "This email is already in use")
 
         # hash password
+        print('before pass')
         user.password = get_password_hash(user.password)
 
         # insert user into MongoDB

@@ -30,6 +30,7 @@ def validate_user_email(email: str):
         print('eeee', email)
     except EmailNotValidError as e:
         # email is not valid, exception message is human-readable
+        print(str(e))
         raise HTTPException(400, str(e))
 
 class PyObjectId(ObjectId):
