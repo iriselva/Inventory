@@ -6,7 +6,8 @@ from models import User
 
 def add_inventory_routes(app):
     # create item
-    @app.post('/inventory', tags=["Inventory"], status_code=201)
+    @app.post('/inventory', tags=["Inventory"], status_code=201, 
+              description="Creates an inventory item.")
     async def create_item(item: Item, user: User = Depends(get_current_user)):
         # remove empty ID from inventory model
         if hasattr(item, 'id'):
@@ -21,14 +22,16 @@ def add_inventory_routes(app):
         # insert item to database
         result = db.inventory.insert_one(item.dict(by_alias=True))
         if not result.acknowledged:
-            raise HTTPException(400, 'Unable to create item')
+            raise HTTPException(500, 'Unable to create item')
 
         # add newly generated ID to the item
         item.id = result.inserted_id
         return item
     
     # get an inventory item by its ID
-    @app.get('/inventory/{item_id}', tags=['Inventory'], description='Get an inventory item by its ID', status_code=200)
+    @app.get('/inventory/{item_id}', tags=['Inventory'], status_code=200, 
+              description="Gets an inventory item.<br><br>"
+              "Responds with HTTP status code 404 if the item is not found.")
     async def get_item(item_id: str, user: User = Depends(get_current_user)):
         validate_item_id(item_id)
         
@@ -44,7 +47,9 @@ def add_inventory_routes(app):
         return item
 
     # update inventory item
-    @app.patch('/inventory/{item_id}', tags=["Inventory"], description="", status_code=201)
+    @app.patch('/inventory/{item_id}', tags=["Inventory"], status_code=201, 
+              description="Updates an inventory item by replacing it.<br><br>"
+              "Responds with HTTP status code 404 if the item is not found.")
     async def update_item(item_id: str, item: Item, user: User = Depends(get_current_user)):
         validate_item_id(item_id)
 
@@ -65,7 +70,7 @@ def add_inventory_routes(app):
         # need to tell mongo what to do, $set makes it update all values that match update object
         result = db.inventory.update_one({MONGO_ID: ObjectId(item_id)}, { "$set": update})
         if not result.acknowledged:
-            raise HTTPException(400, 'Unable to update item')
+            raise HTTPException(500, 'Unable to update item')
 
         # add ID and user ID to result
         item.id = item_id
@@ -74,7 +79,9 @@ def add_inventory_routes(app):
         return item
 
     # delete item
-    @app.delete('/inventory/{item_id}', tags=["Inventory"], description="", status_code=200)
+    @app.delete('/inventory/{item_id}', tags=["Inventory"], status_code=200, 
+              description="Deletes an inventory item.<br><br>"
+              "Response with HTTP status code 404 if item is not found.")
     async def delete_item(item_id: str, user: User = Depends(get_current_user)):
         validate_item_id(item_id)
 
@@ -86,10 +93,11 @@ def add_inventory_routes(app):
         # delete item from database
         result = db.inventory.delete_one({MONGO_ID: ObjectId(item_id)})
         if result.deleted_count == 0:
-          raise HTTPException(400, 'Unable to delete item')
+          raise HTTPException(500, 'Unable to delete item')
 
     # get all inventory items by user
-    @app.get('/inventory', tags=["Inventory"], description="A more detailed description goes here.....")
+    @app.get('/inventory', tags=["Inventory"], 
+              description="Lists the user's inventory items.")
     async def get_inventory(user: User = Depends(get_current_user)):
         items = []
         # find all items in database by user ID and append them to the items list

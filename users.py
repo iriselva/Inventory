@@ -4,19 +4,18 @@ from fastapi import HTTPException, Depends
 
 def add_users_routes(app):
     # create user
-    @app.post('/users', tags=["Users"], response_model=UserOut, status_code=201)
+    @app.post('/users', tags=["Users"], response_model=UserOut, status_code=201, 
+              description="Creats a new user.<br><br>"
+              "Responds with HTTP status code 409 if username or email already exists.")
     async def create_user(user: User):
         # remove empty ID from user model
         if hasattr(user, 'id'):
             delattr(user, 'id')
 
         # check if email is valid
-        print('before validate')
         validate_user_email(user.email)
-        print('after validate')
         # check if email is already in use
         try:
-            print('before find')
             email_user = db.users.find_one({'email': user.email})
         except Exception as e:
             raise HTTPException(500, "Internal Server Error")
@@ -32,7 +31,6 @@ def add_users_routes(app):
             raise HTTPException(409, "This username is already in use")
 
         # hash password
-        print('before pass')
         user.password = get_password_hash(user.password)
 
         # insert user into MongoDB
@@ -45,7 +43,8 @@ def add_users_routes(app):
         return dict(user)
 
     # get current user
-    @app.get('/users', tags=["Users"], status_code=200)
+    @app.get('/users', tags=["Users"], status_code=200, 
+             description="Gets information about the logged in user.")
     async def get_user(user: User = Depends(get_current_user)):
         # convert object ID to string
         user['id'] = str(user['_id'])
@@ -56,11 +55,11 @@ def add_users_routes(app):
 
         return user
 
-
     # delete a user
-    @app.delete('/users', tags=["Users"], status_code=200)
+    @app.delete('/users', tags=["Users"], status_code=200, 
+                 description="Deletes the currently logged in user.<br><br>")
     async def delete_user(user: User = Depends(get_current_user)):
         result = db.users.delete_one({MONGO_ID: user[MONGO_ID]})
 
         if result.deleted_count == 0:
-            raise HTTPException(400, 'Unable to delete')
+            raise HTTPException(500, 'Unable to delete user')

@@ -32,7 +32,8 @@ def custom_openapi():
         "<b>Getting Started</b><br><br>"
         "To start using the API you must first create a user using the POST /users endpoint.<br>After you've created a user you get an OAuth2 access token by sending a POST request <br>"
         "to /token with the newly created credentials. To use the API you must place this token <br>in an Authorization header of all requests."
-        " This token remains valid for 30 minutes.",
+        " This token remains valid for 30 minutes.<br><br>"
+        "All API endpoints can respond with <b>HTTP status code 500</b> if something unexpected goes wrong.",
         routes=app.routes
     )
 
@@ -52,7 +53,9 @@ async def index():
     return response
 
 # login for access token
-@app.post('/token', tags=["Login"], response_model=Token)
+@app.post('/token', tags=["Login"], response_model=Token,
+          description="This API endpoint is used to obtain an access token by sending a username and password as form data.<br><br>"
+          "Responds with HTTP status code 401 if authentication fails.")
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
     # authenticate user by username and password
     user = authenticate_user(form_data.username, form_data.password)
